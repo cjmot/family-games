@@ -48,12 +48,12 @@ export default function Rules({ rules }: Props) {
 	return (
 		<div>
 			{sections.map((s, idx) => (
-				<>
+				<div key={s.heading}>
 					<BlockTitle>{s.heading}</BlockTitle>
 					<Block key={`${s.heading}-${idx}`}>
 						<p className="whitespace-pre-wrap font-sans m-0 mx-4">{s.body}</p>
 					</Block>
-				</>
+				</div>
 			))}
 		</div>
 	)
