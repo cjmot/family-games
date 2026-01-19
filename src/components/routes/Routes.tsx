@@ -9,7 +9,7 @@ export default function Routes() {
 	return (
 		<>
 			<RouterRoutes>
-				<Route element={<Shell />}>
+				<Route path="family-games" element={<Shell />}>
 					<Route index element={<HomePage />} />
 
 					<Route path="games/*">

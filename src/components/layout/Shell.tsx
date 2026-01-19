@@ -14,7 +14,7 @@ export default function Shell() {
 				className={`left-0 fixed transition-all bottom-0 mt-auto ${hideToolbar ? 'translate-y-20' : 'translate-y-0'}`}
 			>
 				<ToolbarPane className="flex justify-center">
-					<Link href="/">Home</Link>
+					<Link href="/family-games/">Home</Link>
 				</ToolbarPane>
 			</Toolbar>
 		</Page>

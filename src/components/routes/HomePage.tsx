@@ -13,7 +13,7 @@ export default function HomePage() {
 						link
 						title={game.name}
 						after={`${game.minPlayers}–${game.maxPlayers} players`}
-						href={`/games/${game.id}`}
+						href={`/family-games/games/${game.id}`}
 					/>
 				))}
 			</List>
