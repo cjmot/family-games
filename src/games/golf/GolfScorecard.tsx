@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { type Player } from './scoring/logic'
 import PlayersDialog from '../../components/PlayersDialog'
 import ScoreDialog from '../../components/ScoreDialog.tsx'
-import LongPressButton from '../../components/LongPressButton.tsx'
+// import DoublePressButton from '../../components/DoublePressButton.tsx'
 
 export default function GolfScorecard() {
 	const [players, setPlayers] = useState<Player[]>([])
@@ -62,17 +62,18 @@ export default function GolfScorecard() {
 										key={`${player.name}-round-${round}`}
 										className="text-center"
 									>
-										<LongPressButton
-											onLongPress={() => {
+										<button
+											onClick={() => {
 												setScoreToChange({
 													playerName: player.name,
 													round: round,
 													prevScore: player.scores[round - 1],
 												})
+												console.log('double pressed')
 											}}
 										>
 											{player.scores[round - 1]}
-										</LongPressButton>
+										</button>
 									</TableCell>
 								))}
 							</TableRow>
@@ -119,7 +120,7 @@ export default function GolfScorecard() {
 			</Block>
 			<Block className="w-full flex space-x-4">
 				<p>
-					<i>Long press a number to change it</i>
+					<i>Tap on a number to change it</i>
 				</p>
 			</Block>
 
