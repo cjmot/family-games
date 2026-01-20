@@ -12,7 +12,7 @@ export default function GamePage({ game }: Props) {
 
 	return (
 		<div>
-			<div className="flex flex-col top-0 px-4 pt-4 items-center sticky z-50 w-full backdrop-blur-sm">
+			<div className="flex flex-col top-0 px-4 pt-4 items-center w-full">
 				<BlockTitle className="text-2xl font-semibold tracking-wide mb-1">
 					{game.name.toUpperCase()}
 				</BlockTitle>

@@ -25,7 +25,7 @@ export default function ScoreDialog({ sheetOpened, onClose, prevScore }: Props) 
 			<Block className="ios:mt-4">
 				<input
 					id="new-player-input"
-					className="w-full outline-1 outline-black h-10 p-2 text-lg  "
+					className="outline-1 text-center rounded-2xl w-fit outline-black h-10 p-2 text-lg  "
 					type="number"
 					placeholder="Name"
 					value={newScore.value}

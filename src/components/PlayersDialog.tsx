@@ -38,7 +38,7 @@ export default function PlayersDialog({ sheetOpened, onClose }: Props) {
 			<Block className="ios:mt-4">
 				<input
 					id="new-player-input"
-					className="w-full outline-1 outline-black h-10 p-2 text-lg  "
+					className="w-full outline-1 rounded-2xl text-center outline-black h-10 p-2 text-lg"
 					type="text"
 					placeholder="Name"
 					value={name.value}
