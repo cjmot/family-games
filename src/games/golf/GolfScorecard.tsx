@@ -69,12 +69,6 @@ export default function GolfScorecard() {
 													round: round,
 													prevScore: player.scores[round - 1],
 												})
-												console.log(
-													'long press',
-													player.name,
-													round,
-													player.scores[round - 1]
-												)
 											}}
 										>
 											{player.scores[round - 1]}
