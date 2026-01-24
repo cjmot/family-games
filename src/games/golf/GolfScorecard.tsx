@@ -1,32 +1,72 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, Block, Button, Card } from 'konsta/react'
 import { useMemo, useState } from 'react'
-import { type Player } from './scoring/logic'
 import PlayersDialog from '../../components/PlayersDialog'
 import ScoreDialog from '../../components/ScoreDialog.tsx'
+import { useScorecardState } from '../../hooks/scorecard/useScorecardState'
 
 export default function GolfScorecard() {
-	const [players, setPlayers] = useState<Player[]>([])
-	const [rounds, setRounds] = useState<number[]>([1])
+	const { state, setState } = useScorecardState()
+
 	const [scoreToChange, setScoreToChange] = useState<{
 		playerName: string
 		round: number
 		prevScore: number
 	} | null>(null)
+
 	const [playersModalOpen, setPlayersModalOpen] = useState(false)
 
 	const sortedPlayers = useMemo(
-		() => [...players].sort((a, b) => a.name.localeCompare(b.name)),
-		[players]
+		() => [...state.players].sort((a, b) => a.name.localeCompare(b.name)),
+		[state.players]
 	)
 
 	const setPlayerScore = (name: string, round: number, score: number) => {
-		setPlayers((prev) =>
-			prev.map((p) =>
-				p.name === name
-					? { ...p, scores: p.scores.map((s, i) => (i === round - 1 ? score : s)) }
-					: p
-			)
-		)
+		setState((prev) => {
+			const roundIndex = round - 1
+			return {
+				...prev,
+				players: prev.players.map((p) => {
+					if (p.name !== name) return p
+					const scores = [...p.scores]
+					if (roundIndex >= scores.length) {
+						const targetLen = Math.max(roundIndex + 1, prev.rounds.length)
+						while (scores.length < targetLen) scores.push(0)
+					}
+					scores[roundIndex] = score
+					return { ...p, scores }
+				}),
+			}
+		})
+	}
+
+	const addRound = () => {
+		setState((prev) => {
+			return {
+				...prev,
+				rounds: [...prev.rounds, prev.rounds.length + 1],
+			}
+		})
+		setState((prev) => {
+			return {
+				...prev,
+				players: prev.players.map((p) => ({
+					...p,
+					scores: [...p.scores, 0],
+				})),
+			}
+		})
+	}
+
+	const removeRound = () => {
+		setState((prev) => {
+			return { ...prev, rounds: prev.rounds.slice(0, -1) }
+		})
+		setState((prev) => {
+			return {
+				...prev,
+				players: prev.players.map((p) => ({ ...p, scores: p.scores.slice(0, -1) })),
+			}
+		})
 	}
 
 	return (
@@ -47,7 +87,7 @@ export default function GolfScorecard() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{rounds.map((round) => (
+						{state.rounds.map((round) => (
 							<TableRow key={round}>
 								<TableCell
 									header
@@ -77,7 +117,7 @@ export default function GolfScorecard() {
 								))}
 							</TableRow>
 						))}
-						<TableRow key="totals" hidden={rounds.length === 0}>
+						<TableRow key="totals" hidden={state.rounds.length === 0}>
 							<TableCell header key="totals-header">
 								Totals
 							</TableCell>
@@ -94,25 +134,14 @@ export default function GolfScorecard() {
 				</Table>
 			</Card>
 			<Block className="w-full flex flex-col space-y-4">
-				<Button
-					roundedIos
-					onClick={() => {
-						setRounds((r) => [...r, r.length + 1])
-						setPlayers((prev) => prev.map((p) => ({ ...p, scores: [...p.scores, 0] })))
-					}}
-				>
+				<Button roundedIos onClick={() => addRound()}>
 					Add Round
 				</Button>
 				<Button
 					roundedIos
 					outline
-					onClick={() => {
-						setRounds((r) => r.slice(0, -1))
-						setPlayers((prev) =>
-							prev.map((p) => ({ ...p, scores: p.scores.slice(0, -1) }))
-						)
-					}}
-					disabled={rounds.length === 0}
+					onClick={() => removeRound()}
+					disabled={state.rounds.length === 0}
 				>
 					Remove Round
 				</Button>
@@ -127,11 +156,17 @@ export default function GolfScorecard() {
 				sheetOpened={playersModalOpen}
 				onClose={(name) => {
 					setPlayersModalOpen(false)
-					if (name)
-						setPlayers((players) => [
-							...players,
-							{ name, scores: Array(rounds.length).fill(0) },
-						])
+					if (name) {
+						setState((prev) => {
+							return {
+								...prev,
+								players: [
+									...prev.players,
+									{ name, scores: Array(state.rounds.length).fill(0) },
+								],
+							}
+						})
+					}
 				}}
 			/>
 			{scoreToChange !== null && (

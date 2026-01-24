@@ -9,3 +9,8 @@ export interface GameDefinition {
 	rules: string
 	Scorecard: ComponentType
 }
+
+export interface Player {
+	name: string
+	scores: number[]
+}
