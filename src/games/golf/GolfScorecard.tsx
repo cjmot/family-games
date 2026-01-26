@@ -1,17 +1,21 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, Block, Button, Card } from 'konsta/react'
 import { useMemo, useState } from 'react'
-import PlayersDialog from '../../components/PlayersDialog'
+import AddPlayersDialog from '../../components/AddPlayersDialog.tsx'
+import ChangePlayerDialog from '../../components/ChangePlayerDialog'
 import ScoreDialog from '../../components/ScoreDialog.tsx'
 import { useScorecardState } from '../../hooks/scorecard/useScorecardState'
+import type { Player } from '../types.ts'
 
 export default function GolfScorecard() {
-	const { state, setState } = useScorecardState()
+	const { state, setState, resetState } = useScorecardState()
 
 	const [scoreToChange, setScoreToChange] = useState<{
-		playerName: string
+		playerId: string
 		round: number
 		prevScore: number
 	} | null>(null)
+
+	const [playerToChange, setPlayerToChange] = useState<Player | null>(null)
 
 	const [playersModalOpen, setPlayersModalOpen] = useState(false)
 
@@ -20,13 +24,13 @@ export default function GolfScorecard() {
 		[state.players]
 	)
 
-	const setPlayerScore = (name: string, round: number, score: number) => {
+	const setPlayerScore = (id: string, round: number, score: number) => {
 		setState((prev) => {
 			const roundIndex = round - 1
 			return {
 				...prev,
 				players: prev.players.map((p) => {
-					if (p.name !== name) return p
+					if (p.id !== id) return p
 					const scores = [...p.scores]
 					if (roundIndex >= scores.length) {
 						const targetLen = Math.max(roundIndex + 1, prev.rounds.length)
@@ -69,33 +73,86 @@ export default function GolfScorecard() {
 		})
 	}
 
+	const addPlayer = (name: string) => {
+		setState((prev) => {
+			return {
+				...prev,
+				players: [
+					...prev.players,
+					{
+						id: crypto.randomUUID(),
+						name: name,
+						scores: Array(state.rounds.length).fill(0),
+					},
+				],
+			}
+		})
+	}
+
+	const changePlayerName = (id: string, newName: string) => {
+		setState((prev) => {
+			return {
+				...prev,
+				players: prev.players.map((p) => {
+					if (p.id !== id) return p
+					return { ...p, name: newName }
+				}),
+			}
+		})
+	}
+
+	const clearScores = () => {
+		setState((prev) => {
+			return {
+				players: prev.players.map((p) => ({
+					...p,
+					scores: [0],
+				})),
+				rounds: [1],
+			}
+		})
+	}
+
+	const removePlayer = (id: string) => {
+		setState((prev) => {
+			return {
+				...prev,
+				players: prev.players.filter((p) => p.id !== id),
+			}
+		})
+	}
+
 	return (
 		<div className="h-full w-full">
-			<Card className="overflow-x-auto">
+			<div className="flex space-x-2">
 				<Button roundedIos onClick={() => setPlayersModalOpen(true)}>
 					Add Player
 				</Button>
-				<Table className="overflow-auto">
+				<Button roundedIos onClick={() => addRound()}>
+					Add Round
+				</Button>
+			</div>
+			<Card className="overflow-auto">
+				<Table className="overflow-x-auto">
 					<TableHead>
 						<TableRow header>
-							<TableCell header className="text-right"></TableCell>
 							{sortedPlayers.map((player) => (
 								<TableCell key={player.name} className="text-center">
-									{player.name}
+									<button
+										onClick={() => {
+											setPlayerToChange(player)
+										}}
+									>
+										{player.name}
+									</button>
 								</TableCell>
 							))}
+							<TableCell></TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{state.rounds.map((round) => (
 							<TableRow key={round}>
-								<TableCell
-									header
-									key={`round-${round}`}
-									className="text-left font-semibold"
-								>
-									{round}
-								</TableCell>
 								{sortedPlayers.map((player) => (
 									<TableCell
 										key={`${player.name}-round-${round}`}
@@ -104,23 +161,26 @@ export default function GolfScorecard() {
 										<button
 											onClick={() => {
 												setScoreToChange({
-													playerName: player.name,
+													playerId: player.id,
 													round: round,
 													prevScore: player.scores[round - 1],
 												})
-												console.log('double pressed')
 											}}
 										>
 											{player.scores[round - 1]}
 										</button>
 									</TableCell>
 								))}
+								<TableCell
+									header
+									key={`round-${round}`}
+									className="text-left font-semibold"
+								>
+									{round}
+								</TableCell>
 							</TableRow>
 						))}
 						<TableRow key="totals" hidden={state.rounds.length === 0}>
-							<TableCell header key="totals-header">
-								Totals
-							</TableCell>
 							{sortedPlayers.map((player) => (
 								<TableCell
 									key={player.name + '-total'}
@@ -129,56 +189,91 @@ export default function GolfScorecard() {
 									{player.scores.reduce((a, b) => a + b, 0)}
 								</TableCell>
 							))}
+							<TableCell header key="totals-header">
+								Totals
+							</TableCell>
 						</TableRow>
 					</TableBody>
 				</Table>
 			</Card>
-			<Block className="w-full flex flex-col space-y-4">
-				<Button roundedIos onClick={() => addRound()}>
-					Add Round
-				</Button>
+			<div className="w-full flex space-x-2 mb-4">
 				<Button
 					roundedIos
 					outline
 					onClick={() => removeRound()}
-					disabled={state.rounds.length === 0}
+					disabled={state.rounds.length === 1}
 				>
 					Remove Round
 				</Button>
-			</Block>
+				<Button
+					roundedIos
+					outline
+					onClick={() => clearScores()}
+					disabled={
+						state.rounds.length === 1 &&
+						state.players.every((p) => p.scores.every((s) => s === 0))
+					}
+				>
+					Reset Scores
+				</Button>
+			</div>
+			<div className="w-full flex justify-center">
+				<Button
+					className="w-fit self-center px-8"
+					color={'#ff3b30'}
+					roundedIos
+					clear
+					onClick={() => resetState()}
+				>
+					Reset Scorecard
+				</Button>
+			</div>
 			<Block className="w-full flex space-x-4">
 				<p>
-					<i>Tap on a score to change it</i>
+					<i>Hint: Tap on a name or score to change it</i>
 				</p>
 			</Block>
 
-			<PlayersDialog
+			<AddPlayersDialog
 				sheetOpened={playersModalOpen}
 				onClose={(name) => {
 					setPlayersModalOpen(false)
 					if (name) {
-						setState((prev) => {
-							return {
-								...prev,
-								players: [
-									...prev.players,
-									{ name, scores: Array(state.rounds.length).fill(0) },
-								],
-							}
-						})
+						addPlayer(name)
 					}
 				}}
 			/>
 			{scoreToChange !== null && (
 				<ScoreDialog
-					key={`${scoreToChange.playerName}-${scoreToChange.round}-${scoreToChange.prevScore}`}
+					key={`${scoreToChange.playerId}-${scoreToChange.round}-${scoreToChange.prevScore}`}
 					sheetOpened={!!scoreToChange}
 					prevScore={scoreToChange.prevScore}
 					onClose={(newScore) => {
 						const st = scoreToChange
 						setScoreToChange(null)
 						if (st && newScore !== undefined && newScore !== st.prevScore) {
-							setPlayerScore(st.playerName, st.round, newScore)
+							setPlayerScore(st.playerId, st.round, newScore)
+						}
+					}}
+				/>
+			)}
+			{playerToChange !== null && (
+				<ChangePlayerDialog
+					key={`${playerToChange.id}-${playerToChange.name}-change`}
+					sheetOpened={!!playerToChange}
+					prevPlayerName={playerToChange.name ?? ''}
+					onClose={(newName?) => {
+						const st = playerToChange
+						setPlayerToChange(null)
+						if (st && newName !== undefined && newName !== st.name) {
+							changePlayerName(st.id, newName)
+						}
+					}}
+					onDelete={() => {
+						const st = playerToChange
+						setPlayerToChange(null)
+						if (st) {
+							removePlayer(st.id)
 						}
 					}}
 				/>
