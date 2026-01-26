@@ -6,7 +6,7 @@ interface Props {
 	onClose: (name?: string) => void
 }
 
-export default function PlayersDialog({ sheetOpened, onClose }: Props) {
+export default function AddPlayersDialog({ sheetOpened, onClose }: Props) {
 	const [name, setName] = useState({ value: '', changed: false })
 	const clearName = () => setName({ value: '', changed: false })
 
