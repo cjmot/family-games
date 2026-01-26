@@ -27,7 +27,7 @@ export default function ScoreDialog({ sheetOpened, onClose, prevScore }: Props) 
 					id="new-player-input"
 					className="outline-1 text-center rounded-2xl outline-black h-10 p-2 text-lg  "
 					type="number"
-					placeholder="Name"
+					placeholder={prevScore?.toString()}
 					value={newScore.value}
 					onChange={(e) => setNewScore({ value: e.target.value, changed: true })}
 				/>
