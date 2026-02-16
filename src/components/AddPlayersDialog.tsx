@@ -1,5 +1,5 @@
 import { Button, Block, Dialog } from 'konsta/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Props {
 	sheetOpened: boolean
@@ -8,7 +8,16 @@ interface Props {
 
 export default function AddPlayersDialog({ sheetOpened, onClose }: Props) {
 	const [name, setName] = useState({ value: '', changed: false })
+	const inputRef = useRef<HTMLInputElement>(null)
 	const clearName = () => setName({ value: '', changed: false })
+
+	useEffect(() => {
+		if (!sheetOpened) return
+		const timer = window.setTimeout(() => {
+			inputRef.current?.focus()
+		}, 0)
+		return () => window.clearTimeout(timer)
+	}, [sheetOpened])
 
 	useEffect(() => {
 		if (!sheetOpened) return
@@ -37,6 +46,7 @@ export default function AddPlayersDialog({ sheetOpened, onClose }: Props) {
 		>
 			<Block className="ios:mt-4">
 				<input
+					ref={inputRef}
 					id="new-player-input"
 					className="w-full outline-1 rounded-2xl text-center outline-black h-10 p-2 text-lg"
 					type="text"

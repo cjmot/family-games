@@ -123,12 +123,6 @@ export default function GolfScorecard() {
 		})
 	}
 
-	const confirmAndRemovePlayer = (player: Player) => {
-		const shouldDelete = window.confirm(`Delete ${player.name} from this scorecard?`)
-		if (!shouldDelete) return
-		removePlayer(player.id)
-	}
-
 	return (
 		<div className="h-full w-full">
 			<div className="flex space-x-2">
@@ -152,13 +146,6 @@ export default function GolfScorecard() {
 											}}
 										>
 											{player.name}
-										</button>
-										<button
-											aria-label={`Delete ${player.name}`}
-											className="text-red-500"
-											onClick={() => confirmAndRemovePlayer(player)}
-										>
-											x
 										</button>
 									</div>
 								</TableCell>
@@ -246,7 +233,7 @@ export default function GolfScorecard() {
 			</div>
 			<Block className="w-full flex space-x-4">
 				<p>
-					<i>Hint: Tap on a name or score to change it</i>
+					<i>Tap on a name or score to change it</i>
 				</p>
 			</Block>
 
