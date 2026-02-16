@@ -137,26 +137,28 @@ export default function GolfScorecard() {
 				<Table className="overflow-x-auto">
 					<TableHead>
 						<TableRow header>
-							{sortedPlayers.map((player) => (
-								<TableCell key={player.id} className="text-center">
-									<div className="flex items-center justify-center gap-2">
-										<button
-											onClick={() => {
-												setPlayerToChange(player)
-											}}
-										>
-											{player.name}
-										</button>
-									</div>
+							<TableCell className="text-left font-semibold">Player</TableCell>
+							{state.rounds.map((round) => (
+								<TableCell key={`round-${round}`} className="text-center font-semibold">
+									{round}
 								</TableCell>
 							))}
-							<TableCell></TableCell>
+							<TableCell className="text-center font-semibold">Total</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{state.rounds.map((round) => (
-							<TableRow key={round}>
-								{sortedPlayers.map((player) => (
+						{sortedPlayers.map((player) => (
+							<TableRow key={player.id}>
+								<TableCell className="text-left">
+									<button
+										onClick={() => {
+											setPlayerToChange(player)
+										}}
+									>
+										{player.name}
+									</button>
+								</TableCell>
+								{state.rounds.map((round) => (
 									<TableCell
 										key={`${player.id}-round-${round}`}
 										className="text-center"
@@ -174,28 +176,11 @@ export default function GolfScorecard() {
 										</button>
 									</TableCell>
 								))}
-								<TableCell
-									header
-									key={`round-${round}`}
-									className="text-left font-semibold"
-								>
-									{round}
+								<TableCell className="text-center font-bold">
+									{player.scores.reduce((a, b) => a + b, 0)}
 								</TableCell>
 							</TableRow>
 						))}
-						<TableRow key="totals" hidden={state.rounds.length === 0}>
-							{sortedPlayers.map((player) => (
-								<TableCell
-									key={player.id + '-total'}
-									className="text-center font-bold"
-								>
-									{player.scores.reduce((a, b) => a + b, 0)}
-								</TableCell>
-							))}
-							<TableCell header key="totals-header">
-								Totals
-							</TableCell>
-						</TableRow>
 					</TableBody>
 				</Table>
 			</Card>
