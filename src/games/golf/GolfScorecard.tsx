@@ -114,12 +114,19 @@ export default function GolfScorecard() {
 	}
 
 	const removePlayer = (id: string) => {
+		if (!id) return
 		setState((prev) => {
 			return {
 				...prev,
 				players: prev.players.filter((p) => p.id !== id),
 			}
 		})
+	}
+
+	const confirmAndRemovePlayer = (player: Player) => {
+		const shouldDelete = window.confirm(`Delete ${player.name} from this scorecard?`)
+		if (!shouldDelete) return
+		removePlayer(player.id)
 	}
 
 	return (
@@ -137,14 +144,23 @@ export default function GolfScorecard() {
 					<TableHead>
 						<TableRow header>
 							{sortedPlayers.map((player) => (
-								<TableCell key={player.name} className="text-center">
-									<button
-										onClick={() => {
-											setPlayerToChange(player)
-										}}
-									>
-										{player.name}
-									</button>
+								<TableCell key={player.id} className="text-center">
+									<div className="flex items-center justify-center gap-2">
+										<button
+											onClick={() => {
+												setPlayerToChange(player)
+											}}
+										>
+											{player.name}
+										</button>
+										<button
+											aria-label={`Delete ${player.name}`}
+											className="text-red-500"
+											onClick={() => confirmAndRemovePlayer(player)}
+										>
+											x
+										</button>
+									</div>
 								</TableCell>
 							))}
 							<TableCell></TableCell>
@@ -155,7 +171,7 @@ export default function GolfScorecard() {
 							<TableRow key={round}>
 								{sortedPlayers.map((player) => (
 									<TableCell
-										key={`${player.name}-round-${round}`}
+										key={`${player.id}-round-${round}`}
 										className="text-center"
 									>
 										<button
@@ -183,7 +199,7 @@ export default function GolfScorecard() {
 						<TableRow key="totals" hidden={state.rounds.length === 0}>
 							{sortedPlayers.map((player) => (
 								<TableCell
-									key={player.name + '-total'}
+									key={player.id + '-total'}
 									className="text-center font-bold"
 								>
 									{player.scores.reduce((a, b) => a + b, 0)}

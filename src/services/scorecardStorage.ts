@@ -1,4 +1,4 @@
-import type { Player } from '../games/types' // <-- adjust
+import type { Player } from '../games/types'
 
 export type ScorecardState = {
 	players: Player[]
@@ -33,6 +33,7 @@ function normalize(state: ScorecardState): ScorecardState {
 	const roundsLen = state.rounds.length
 
 	const players = state.players.map((p) => {
+		const id = p.id.length > 0 ? p.id : crypto.randomUUID()
 		const scores = [...p.scores]
 
 		if (scores.length < roundsLen) {
@@ -41,7 +42,7 @@ function normalize(state: ScorecardState): ScorecardState {
 			scores.splice(roundsLen)
 		}
 
-		return { ...p, scores }
+		return { ...p, id, scores }
 	})
 
 	return { ...state, players }
