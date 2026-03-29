@@ -1,0 +1,10 @@
+services:
+  app:
+    image: ${IMAGE}
+    container_name: ${PROJECT_NAME}-app
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT}:3000"
+    environment:
+      NODE_ENV: staging
+      BRANCH_NAME: ${BRANCH_NAME}
