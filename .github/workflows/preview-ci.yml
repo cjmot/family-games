@@ -32,10 +32,9 @@ jobs:
         run: |
           BRANCH_SLUG=$(echo "${GITHUB_REF_NAME}" | tr '/[:upper:]' '-[:lower:]' | sed 's/[^a-z0-9-]//g')
           IMAGE_REF="ghcr.io/${GITHUB_REPOSITORY,,}:${BRANCH_SLUG}"
-          
-          # crude stable-ish port assignment from branch name
+
           HASH=$(echo -n "$BRANCH_SLUG" | cksum | cut -d ' ' -f1)
-          HOST_PORT=$(( 4000 + HASH % 1000 ))
+          HOST_PORT=$((4000 + HASH % 1000))
 
           echo "branch_slug=$BRANCH_SLUG" >> "$GITHUB_OUTPUT"
           echo "image_ref=$IMAGE_REF" >> "$GITHUB_OUTPUT"
@@ -53,38 +52,38 @@ jobs:
   deploy-local:
     if: github.event_name == 'push'
     needs: build-and-push
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: Deploy preview with Compose
+      - name: Deploy preview container
         env:
-          BRANCH_NAME: ${{ github.ref_name }}
           BRANCH_SLUG: ${{ needs.build-and-push.outputs.branch_slug }}
           IMAGE: ${{ needs.build-and-push.outputs.image_ref }}
           HOST_PORT: ${{ needs.build-and-push.outputs.host_port }}
         run: |
-          export PROJECT_NAME="myapp-${BRANCH_SLUG}"
+          CONTAINER_NAME="family-games-${BRANCH_SLUG}"
+
           docker pull "$IMAGE"
-          docker compose -p "$PROJECT_NAME" -f compose.preview.yaml up -d
+          docker rm -f "$CONTAINER_NAME" || true
+
+          docker run -d \
+            --name "$CONTAINER_NAME" \
+            -p "${HOST_PORT}:80" \
+            "$IMAGE"
 
       - name: Show preview URL
         env:
           HOST_PORT: ${{ needs.build-and-push.outputs.host_port }}
-        run: |
-          echo "Preview available at http://localhost:${HOST_PORT}"
+        run: echo "Preview available at http://localhost:${HOST_PORT}"
 
   cleanup-local:
     if: github.event_name == 'delete' && github.event.ref_type == 'branch'
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Compute branch slug
         id: vars
         shell: bash
@@ -92,9 +91,9 @@ jobs:
           BRANCH_SLUG=$(echo "${{ github.event.ref }}" | tr '/[:upper:]' '-[:lower:]' | sed 's/[^a-z0-9-]//g')
           echo "branch_slug=$BRANCH_SLUG" >> "$GITHUB_OUTPUT"
 
-      - name: Tear down preview
+      - name: Remove preview container
         env:
           BRANCH_SLUG: ${{ steps.vars.outputs.branch_slug }}
         run: |
-          export PROJECT_NAME="myapp-${BRANCH_SLUG}"
-          docker compose -p "$PROJECT_NAME" -f compose.preview.yaml down -v || true
+          CONTAINER_NAME="family-games-${BRANCH_SLUG}"
+          docker rm -f "$CONTAINER_NAME" || true
