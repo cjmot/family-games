@@ -5,7 +5,6 @@ on:
     branches-ignore:
       - main
   delete:
-  workflow_dispatch:
 
 concurrency:
   group: preview-${{ github.ref }}
