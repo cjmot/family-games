@@ -10,6 +10,8 @@ interface Props {
 	prevScore: number | null
 	playerName: string
 	round: number
+	roundLabel?: string
+	quickScores?: number[]
 }
 export default function ScoreDialog({
 	sheetOpened,
@@ -18,6 +20,8 @@ export default function ScoreDialog({
 	prevScore,
 	playerName,
 	round,
+	roundLabel = 'Round',
+	quickScores = [-2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 }: Props) {
 	const [newScore, setNewScore] = useState({ value: prevScore?.toString() ?? '', changed: false })
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -57,7 +61,7 @@ export default function ScoreDialog({
 			>
 				<h2 className="dialog-title">Change Score</h2>
 				<p className="dialog-context">
-					{playerName} · Round {round}
+					{playerName} · {roundLabel} {round}
 				</p>
 				<div className="score-stepper">
 					<RepeatButton onPress={() => adjustScore(-1)} aria-label="Decrease score">
@@ -72,7 +76,7 @@ export default function ScoreDialog({
 						inputMode="numeric"
 						step="1"
 						placeholder={prevScore?.toString()}
-						aria-label={`Score for ${playerName}, round ${round}`}
+						aria-label={`Score for ${playerName}, ${roundLabel.toLowerCase()} ${round}`}
 						value={newScore.value}
 						onChange={(e) => setNewScore({ value: e.target.value, changed: true })}
 					/>
@@ -81,7 +85,7 @@ export default function ScoreDialog({
 					</RepeatButton>
 				</div>
 				<div className="quick-scores" aria-label="Common scores">
-					{[-2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+					{quickScores.map((score) => (
 						<button
 							type="button"
 							key={score}

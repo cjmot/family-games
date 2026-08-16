@@ -5,7 +5,8 @@ export type ScorecardState = {
 	rounds: number[] // e.g. [1,2,3]
 }
 
-const KEY = 'golfScorecard.state.v1'
+export const GOLF_SCORECARD_KEY = 'golfScorecard.state.v1'
+export const GENERIC_SCORECARD_KEY = 'familyGames.scorecard.generic.v1'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null
@@ -61,39 +62,41 @@ function normalize(state: ScorecardState): ScorecardState {
 	return { ...state, players }
 }
 
-export const scorecardStorage = {
-	key: KEY,
+export function createScorecardStorage(key: string) {
+	return {
+		key,
 
-	load(fallback: ScorecardState): ScorecardState {
-		try {
-			const raw = localStorage.getItem(KEY)
-			if (!raw) return fallback
+		load(fallback: ScorecardState): ScorecardState {
+			try {
+				const raw = localStorage.getItem(key)
+				if (!raw) return fallback
 
-			const parsed = JSON.parse(raw)
-			if (!isScorecardState(parsed)) return fallback
+				const parsed = JSON.parse(raw)
+				if (!isScorecardState(parsed)) return fallback
 
-			// Also sanity-check rounds (must be 1..n increasing)
-			const rounds = parsed.rounds.length > 0 ? parsed.rounds.map((_, i) => i + 1) : [1]
+				// Also sanity-check rounds (must be 1..n increasing)
+				const rounds = parsed.rounds.length > 0 ? parsed.rounds.map((_, i) => i + 1) : [1]
 
-			return normalize({ players: parsed.players, rounds })
-		} catch {
-			return fallback
-		}
-	},
+				return normalize({ players: parsed.players, rounds })
+			} catch {
+				return fallback
+			}
+		},
 
-	save(state: ScorecardState): void {
-		try {
-			localStorage.setItem(KEY, JSON.stringify(state))
-		} catch {
-			// ignore quota/private-mode errors
-		}
-	},
+		save(state: ScorecardState): void {
+			try {
+				localStorage.setItem(key, JSON.stringify(state))
+			} catch {
+				// Ignore quota and private-mode errors.
+			}
+		},
 
-	clear(): void {
-		try {
-			localStorage.removeItem(KEY)
-		} catch {
-			// Ignore private-mode and storage access errors.
-		}
-	},
+		clear(): void {
+			try {
+				localStorage.removeItem(key)
+			} catch {
+				// Ignore private-mode and storage access errors.
+			}
+		},
+	}
 }

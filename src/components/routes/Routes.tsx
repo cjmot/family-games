@@ -4,6 +4,7 @@ import HomePage from './HomePage'
 import { games } from '../../games'
 import GamePage from './GamePage'
 import NotFoundPage from './NotFoundPage'
+import GenericScorecardPage from './GenericScorecardPage.tsx'
 
 export default function Routes() {
 	return (
@@ -11,6 +12,7 @@ export default function Routes() {
 			<RouterRoutes>
 				<Route path="family-games" element={<Shell />}>
 					<Route index element={<HomePage />} />
+					<Route path="scorecard" element={<GenericScorecardPage />} />
 
 					<Route path="games/*">
 						{games.map((game) => (
