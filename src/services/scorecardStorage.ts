@@ -12,17 +12,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isNumberArray(value: unknown): value is number[] {
-	return Array.isArray(value) && value.every((n) => typeof n === 'number')
+	return Array.isArray(value) && value.every((number) => typeof number === 'number')
+}
+
+function isScoreArray(value: unknown): value is Array<number | null> {
+	return (
+		Array.isArray(value) &&
+		value.every(
+			(score) => score === null || (typeof score === 'number' && Number.isFinite(score))
+		)
+	)
 }
 
 function isPlayer(value: unknown): value is Player {
 	if (!isRecord(value)) return false
-	return typeof value.name === 'string' && isNumberArray(value.scores)
+	return (
+		typeof value.id === 'string' && typeof value.name === 'string' && isScoreArray(value.scores)
+	)
 }
 
 function isScorecardState(value: unknown): value is ScorecardState {
 	if (!isRecord(value)) return false
-	return isNumberArray(value.rounds) && Array.isArray(value.players) && value.players.every(isPlayer)
+	return (
+		isNumberArray(value.rounds) && Array.isArray(value.players) && value.players.every(isPlayer)
+	)
 }
 
 /**
@@ -37,7 +50,7 @@ function normalize(state: ScorecardState): ScorecardState {
 		const scores = [...p.scores]
 
 		if (scores.length < roundsLen) {
-			while (scores.length < roundsLen) scores.push(0)
+			while (scores.length < roundsLen) scores.push(null)
 		} else if (scores.length > roundsLen) {
 			scores.splice(roundsLen)
 		}
@@ -60,7 +73,7 @@ export const scorecardStorage = {
 			if (!isScorecardState(parsed)) return fallback
 
 			// Also sanity-check rounds (must be 1..n increasing)
-			const rounds = parsed.rounds.length > 0 ? parsed.rounds.map((_, i) => i + 1) : []
+			const rounds = parsed.rounds.length > 0 ? parsed.rounds.map((_, i) => i + 1) : [1]
 
 			return normalize({ players: parsed.players, rounds })
 		} catch {
@@ -79,6 +92,8 @@ export const scorecardStorage = {
 	clear(): void {
 		try {
 			localStorage.removeItem(KEY)
-		} catch {}
+		} catch {
+			// Ignore private-mode and storage access errors.
+		}
 	},
 }

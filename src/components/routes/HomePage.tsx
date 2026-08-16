@@ -1,22 +1,26 @@
-import { BlockTitle, List, ListItem } from 'konsta/react'
+import { Link } from 'react-router-dom'
 import { games } from '../../games'
 
 export default function HomePage() {
 	return (
-		<>
-			<BlockTitle>Choose a Game</BlockTitle>
+		<main className="home-page">
+			<h1 className="page-title">Choose a Game</h1>
 
-			<List strong inset>
+			<ul className="game-list">
 				{games.map((game) => (
-					<ListItem
-						key={game.id}
-						link
-						title={game.name}
-						after={`${game.minPlayers}–${game.maxPlayers} players`}
-						href={`/family-games/games/${game.id}`}
-					/>
+					<li key={game.id}>
+						<Link className="game-list__link" to={`/family-games/games/${game.id}`}>
+							<span className="game-list__name">{game.name}</span>
+							<span className="game-list__meta">
+								{game.minPlayers}–{game.maxPlayers} players
+								<span aria-hidden="true" className="game-list__chevron">
+									›
+								</span>
+							</span>
+						</Link>
+					</li>
 				))}
-			</List>
-		</>
+			</ul>
+		</main>
 	)
 }

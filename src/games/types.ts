@@ -13,5 +13,5 @@ export interface GameDefinition {
 export interface Player {
 	id: string
 	name: string
-	scores: number[]
+	scores: Array<number | null>
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import { Block, BlockTitle } from 'konsta/react'
 
 export interface Props {
 	rules: string
@@ -46,14 +45,12 @@ export default function Rules({ rules }: Props) {
 	const sections = React.useMemo(() => splitSections(rules), [rules])
 
 	return (
-		<div>
+		<div className="rules">
 			{sections.map((s, idx) => (
-				<div key={s.heading}>
-					<BlockTitle>{s.heading}</BlockTitle>
-					<Block key={`${s.heading}-${idx}`}>
-						<p className="whitespace-pre-wrap font-sans m-0 mx-4">{s.body}</p>
-					</Block>
-				</div>
+				<section className="rules-section" key={`${s.heading}-${idx}`}>
+					<h2 className="section-title">{s.heading}</h2>
+					<p className="whitespace-pre-wrap font-sans m-0">{s.body}</p>
+				</section>
 			))}
 		</div>
 	)

@@ -1,5 +1,6 @@
-import { Button, Block, Dialog } from 'konsta/react'
 import { useEffect, useRef, useState } from 'react'
+import Button from './ui/Button'
+import Dialog from './ui/Dialog'
 
 interface Props {
 	sheetOpened: boolean
@@ -10,6 +11,10 @@ export default function AddPlayersDialog({ sheetOpened, onClose }: Props) {
 	const [name, setName] = useState({ value: '', changed: false })
 	const inputRef = useRef<HTMLInputElement>(null)
 	const clearName = () => setName({ value: '', changed: false })
+	const closeDialog = () => {
+		onClose()
+		clearName()
+	}
 
 	useEffect(() => {
 		if (!sheetOpened) return
@@ -19,54 +24,37 @@ export default function AddPlayersDialog({ sheetOpened, onClose }: Props) {
 		return () => window.clearTimeout(timer)
 	}, [sheetOpened])
 
-	useEffect(() => {
-		if (!sheetOpened) return
-		const handler = (e: KeyboardEvent) => {
-			if (e.key === 'Enter' && sheetOpened && !(e.target instanceof HTMLTextAreaElement)) {
-				onClose(name.changed ? name.value : undefined)
-				clearName()
-			}
-		}
-
-		document.addEventListener('keydown', handler)
-
-		return () => {
-			document.removeEventListener('keydown', handler)
-		}
-	}, [sheetOpened, name.changed, name.value, onClose])
-
 	return (
-		<Dialog
-			className="pb-safe"
-			opened={sheetOpened}
-			onBackdropClick={() => {
-				onClose()
-				clearName()
-			}}
-		>
-			<Block className="ios:mt-4">
+		<Dialog opened={sheetOpened} ariaLabel="Add a player" onClose={closeDialog}>
+			<form
+				onSubmit={(event) => {
+					event.preventDefault()
+					onClose(name.changed ? name.value : undefined)
+					clearName()
+				}}
+			>
+				<h2 className="dialog-title">Add Player</h2>
 				<input
 					ref={inputRef}
 					id="new-player-input"
-					className="w-full outline-1 rounded-2xl text-center outline-black h-10 p-2 text-lg"
+					className="app-input"
 					type="text"
+					required
 					placeholder="Name"
+					aria-label="Player name"
+					autoComplete="off"
 					value={name.value}
 					onChange={(e) => setName({ value: e.target.value, changed: true })}
 				/>
-				<div className="mt-8">
-					<Button
-						large
-						rounded
-						onClick={() => {
-							onClose(name.changed ? name.value : undefined)
-							clearName()
-						}}
-					>
+				<div className="dialog-actions">
+					<Button type="submit" fullWidth disabled={!name.value.trim()}>
 						Add Player
 					</Button>
+					<Button variant="ghost" fullWidth onClick={closeDialog}>
+						Cancel
+					</Button>
 				</div>
-			</Block>
+			</form>
 		</Dialog>
 	)
 }

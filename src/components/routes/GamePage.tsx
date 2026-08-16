@@ -1,4 +1,3 @@
-import { Block, BlockTitle, Segmented, SegmentedButton } from 'konsta/react'
 import type { GameDefinition } from '../../games/types.ts'
 import { useState } from 'react'
 import Rules from '../Rules.tsx'
@@ -11,34 +10,34 @@ export default function GamePage({ game }: Props) {
 	const [segmentActive, setSegmentActive] = useState<'rules' | 'scorecard'>('rules')
 
 	return (
-		<div>
-			<div className="flex flex-col top-0 px-4 pt-4 items-center w-full">
-				<BlockTitle className="text-2xl font-semibold tracking-wide mb-1">
-					{game.name.toUpperCase()}
-				</BlockTitle>
+		<div className="game-page">
+			<header className="game-header flex flex-col px-4 pt-6 items-center w-full">
+				<h1 className="page-title">{game.name.toUpperCase()}</h1>
 
-				<Segmented strongIos roundedIos className="w-full mt-3 shadow shadow-gray-400">
-					<SegmentedButton
-						className="flex-1"
-						active={segmentActive === 'rules'}
+				<div className="segmented-control" role="tablist" aria-label={`${game.name} view`}>
+					<button
+						className="segmented-control__button"
+						aria-selected={segmentActive === 'rules'}
+						role="tab"
 						onClick={() => setSegmentActive('rules')}
 					>
 						Rules
-					</SegmentedButton>
-					<SegmentedButton
-						className="flex-1"
-						active={segmentActive === 'scorecard'}
+					</button>
+					<button
+						className="segmented-control__button"
+						aria-selected={segmentActive === 'scorecard'}
+						role="tab"
 						onClick={() => setSegmentActive('scorecard')}
 					>
 						Scorecard
-					</SegmentedButton>
-				</Segmented>
-			</div>
+					</button>
+				</div>
+			</header>
 
-			<Block inset strong className="flex flex-col items-center relative">
+			<main className="game-content">
 				{segmentActive === 'rules' && <Rules rules={game.rules} />}
 				{segmentActive === 'scorecard' && <game.Scorecard />}
-			</Block>
+			</main>
 		</div>
 	)
 }
