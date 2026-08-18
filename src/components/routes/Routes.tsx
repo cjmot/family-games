@@ -10,11 +10,11 @@ export default function Routes() {
 	return (
 		<>
 			<RouterRoutes>
-				<Route path="family-games" element={<Shell />}>
+				<Route path="" element={<Shell />}>
 					<Route index element={<HomePage />} />
-					<Route path="scorecard" element={<GenericScorecardPage />} />
+					<Route path="/scorecard" element={<GenericScorecardPage />} />
 
-					<Route path="games/*">
+					<Route path="/games/*">
 						{games.map((game) => (
 							<Route
 								path={`${game.name}/*`}
