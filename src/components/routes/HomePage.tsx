@@ -21,10 +21,10 @@ export default function HomePage() {
 			{
 				id: 'generic',
 				title: genericSettings.title,
-				href: '/family-games/scorecard',
+				href: '/scorecard',
 				state: generic,
 			},
-			{ id: 'golf', title: 'Golf', href: '/family-games/games/golf', state: golf },
+			{ id: 'golf', title: 'Golf', href: '/games/golf', state: golf },
 		].filter((session) => session.state.players.length > 0)
 	})
 
@@ -32,7 +32,7 @@ export default function HomePage() {
 		<main className="home-page">
 			<h1 className="page-title">Home</h1>
 
-			<Link className="quick-scorecard-card" to="/family-games/scorecard">
+			<Link className="quick-scorecard-card" to="/scorecard">
 				<span className="quick-scorecard-card__icon" aria-hidden="true">
 					＋
 				</span>
@@ -70,7 +70,7 @@ export default function HomePage() {
 				<ul className="game-list">
 					{games.map((game) => (
 						<li key={game.id}>
-							<Link className="game-list__link" to={`/family-games/games/${game.id}`}>
+							<Link className="game-list__link" to={`/games/${game.id}`}>
 								<span className="game-list__name">{game.name}</span>
 								<span className="game-list__meta">
 									{game.minPlayers}–{game.maxPlayers} players
